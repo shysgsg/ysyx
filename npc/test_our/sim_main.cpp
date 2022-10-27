@@ -7,9 +7,9 @@
 vluint64_t main_time = 0;  //initial 仿真时间
  
 double sc_time_stamp()
- {
+{
      return main_time;
- }
+}
  
 int main(int argc,char **argv)
 {
