@@ -18,6 +18,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <memory/host.h>
+#include <memory/paddr.h>
 
 static int is_batch_mode = false;
 
@@ -49,9 +51,62 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+  // printf("exit successfully!\n");
   return -1;
 }
 
+static int cmd_si(char *args) {
+  char *count = strtok(NULL, " ");
+  if (count == NULL) {
+    cpu_exec(1);
+    return 0;
+  }
+  int i = atoi(count) - 1;
+  if ( i < 0 ) {
+    printf("Invalid input!\n");
+  }
+  while ( i >= 0 ) {
+    cpu_exec(1);
+    i--;  
+  }
+  return 0;
+}
+
+static int cmd_info(char *args) {
+  char *sencondWord = strtok(NULL," ");
+	if (strcmp(sencondWord, "r") == 0){
+		isa_reg_display();
+	  return 0;
+	}
+	printf("Invalid input!\n");
+	return 0;
+}
+
+static int cmd_x(char *args) {
+  char *sencondWord = strtok(NULL," ");
+	char *thirdWord = strtok(NULL, " ");
+	
+	int step = 0;
+	paddr_t address;
+	
+	sscanf(sencondWord, "%d", &step);
+	sscanf(thirdWord, "%x", &address);
+
+	int i, j = 0;
+	for (i = 0; i < step; i++) {
+		if (j % 4 == 0) {
+			printf("%#x:\t", address);
+		}
+		printf("%#lx\t", paddr_read(address, 4));
+		address += 4;
+		j++;
+		if (j % 4 == 0) {
+			printf("\n");
+		}
+	}
+	printf("\n");
+	return 0;
+}
 static int cmd_help(char *args);
 
 static struct {
@@ -62,6 +117,9 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
+  { "si", "Step into", cmd_si },
+  { "info", "Print the information of registers", cmd_info},
+  { "x", "Scan memory ", cmd_x}
 
   /* TODO: Add more commands */
 
@@ -106,7 +164,14 @@ void sdb_mainloop() {
     char *str_end = str + strlen(str);
 
     /* extract the first token as the command */
-    char *cmd = strtok(str, " ");
+    char *cmd;
+    cmd = strtok(str, " ");
+    // printf("%s", cmd);
+    // while( cmd != NULL ) {
+    //   printf( "%s ", cmd );
+    //   cmd = strtok(NULL, " ");
+    // }
+    // printf("\n");
     if (cmd == NULL) { continue; }
 
     /* treat the remaining string as the arguments,
@@ -116,6 +181,10 @@ void sdb_mainloop() {
     if (args >= str_end) {
       args = NULL;
     }
+    // else {
+    //   args = strtok(NULL, " ");
+    //   printf("%s\n", args);
+    // }
 
 #ifdef CONFIG_DEVICE
     extern void sdl_clear_event_queue();
