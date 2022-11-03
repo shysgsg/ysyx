@@ -158,18 +158,6 @@ static bool make_token(char *e) {
 }
 
 
-word_t expr(char *e, bool *success) {
-  if (!make_token(e)) {
-    *success = false;
-    return 0;
-  }
-
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
-}
-
 bool check_parentheses(int p, int q){
 	int a;
 	int j = 0, k = 0;
@@ -229,13 +217,14 @@ int dominant_operator(int p, int q){
 	return op;
 }
 
-word_t eval(int p, int q) {
+int eval(int p, int q) {
 	int result = 0;
 	int op;
 	int val1, val2;
 
   if (p > q) {
     /* Bad expression */
+    printf("Bad expression!\n");
     assert(0);
   }
   else if (p == q) {
@@ -243,6 +232,7 @@ word_t eval(int p, int q) {
     * For now this token should be a number.
     * Return the value of the number.
     */
+    // printf("Single token.\n");
     if (tokens[p].type == NUM){
       sscanf(tokens[p].str, "%d", &result);
       return result;
@@ -263,26 +253,38 @@ word_t eval(int p, int q) {
 	 	if (op == -2){
 			assert(0);
 		} 
-    else if (tokens[p].type == '!'){
-			sscanf(tokens[q].str, "%d", &result);
-			return !result;
-		} 
-    else {
-			assert(0);
-			return 0;
-		}
+    // else if (tokens[p].type == '!'){
+		// 	sscanf(tokens[q].str, "%d", &result);
+		// 	return !result;
+		// } 
+  }
 
-    val1 = eval(p, op - 1);
-		val2 = eval(op + 1, q);
+  val1 = eval(p, op - 1);
+  val2 = eval(op + 1, q);
 
-		switch (tokens[op].type){
-			case '+' : return val1 + val2;	
-			case '-' : return val1 - val2;
-			case '*' : return val1 * val2;
-			case '/' : return val1 / val2;
-			default : assert(0);
-		}
-	}
+  switch (tokens[op].type){
+    case '+' : return val1 + val2;	
+    case '-' : return val1 - val2;
+    case '*' : return val1 * val2;
+    case '/' : return val1 / val2;
+    default : assert(0);
+  }
+	
+  return 0;
+}
+
+word_t expr(char *e, bool *success) {
+  if (!make_token(e)) {
+    *success = false;
+    return 0;
+  }
+
+  /* TODO: Insert codes to evaluate the expression. */
+  // TODO();
+  // printf("hello\n");
+  // printf("%d\n", nr_token);
+  int result = eval(0, nr_token-1);
+  printf("%d\n", result);
   return 0;
 }
 
