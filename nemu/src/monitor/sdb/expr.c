@@ -21,7 +21,15 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ, NUM = 1
+  TK_NOTYPE = 256, 
+  NUM = 1,
+	RESGISTER = 2,
+	HEX = 3,
+	EQ = 4,
+	NOTEQ = 5,
+	OR = 6,
+	AND = 7,
+	POINT, NEG
 
   /* TODO: Add more token types */
 
@@ -41,13 +49,18 @@ static struct rule {
   {"\\-", '-'},         // minus
   {"\\*", '*'},         // multiply
   {"\\/", '/'},         // divide
-  {"\\(", '('},         //
-  {"\\)", ')'},         // 
+  {"\\(", '('},         // Opening parenthesis
+  {"\\)", ')'},         // Closing parenthesis
   
+  {"\\|\\|", OR},       // or
+	{"&&", AND},          // and
+	{"!", '!'},           // not
+  {"==", EQ},						// equal
+	{"!=", NOTEQ},        // not
 
-  {"==", TK_EQ},        // equal
-
-  {"[0-9]+", NUM},
+  {"[0-9]+", NUM},            // number
+  {"\\$[a-z]+", RESGISTER},   // register
+	{"0[xX][0-9a-fA-F]+", HEX}, // hex
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -116,6 +129,36 @@ static bool make_token(char *e) {
 						strncpy(tokens[nr_token].str, &e[position - substr_len], substr_len);
 						nr_token++;
 						break;
+					case 2:
+						tokens[nr_token].type = 2;
+						strncpy(tokens[nr_token].str, &e[position - substr_len], substr_len);
+						nr_token++;
+						break;
+					case 3:
+						tokens[nr_token].type = 3;
+						strncpy(tokens[nr_token].str, &e[position - substr_len], substr_len);
+						nr_token++;
+						break;
+					case 4:
+						tokens[nr_token].type = 4;
+						strcpy(tokens[nr_token].str, "==");
+						nr_token++;
+						break;
+					case 5:
+						tokens[nr_token].type = 5;
+						strcpy(tokens[nr_token].str, "!=");
+						nr_token++;
+						break;
+					case 6:
+						tokens[nr_token].type = 6;
+						strcpy(tokens[nr_token].str, "||");
+						nr_token++;
+						break;
+					case 7:
+						tokens[nr_token].type = 7;
+						strcpy(tokens[nr_token].str, "&&");
+						nr_token++;
+						break;
 					case '+':
 						tokens[nr_token].type = '+';
 						nr_token++;
@@ -130,6 +173,10 @@ static bool make_token(char *e) {
 						break;
 					case '/':
 						tokens[nr_token].type = '/';
+						nr_token++;
+						break;
+					case '!':
+						tokens[nr_token].type = '!';
 						nr_token++;
 						break;
 					case '(':
@@ -253,10 +300,17 @@ int eval(int p, int q) {
 	 	if (op == -2){
 			assert(0);
 		} 
-    // else if (tokens[p].type == '!'){
-		// 	sscanf(tokens[q].str, "%d", &result);
-		// 	return !result;
-		// } 
+    else if (op == -1)
+    {
+      if (tokens[p].type == NEG){
+        sscanf(tokens[q].str, "%d", &result);
+        return -result;
+      }
+    }
+    else if (tokens[p].type == '!'){
+				sscanf(tokens[q].str, "%d", &result);
+				return !result;
+    }
   }
 
   val1 = eval(p, op - 1);
@@ -267,6 +321,20 @@ int eval(int p, int q) {
     case '-' : return val1 - val2;
     case '*' : return val1 * val2;
     case '/' : return val1 / val2;
+    case OR : return val1 || val2;
+    case AND : return val1 && val2;
+    case EQ : 
+          if (val1 == val2){
+        return 1;
+          } else {
+        return 0;
+          }
+    case NOTEQ :
+          if (val1 != val2){
+        return 1;
+          } else {
+        return 0;
+          }
     default : assert(0);
   }
 	
@@ -283,6 +351,15 @@ word_t expr(char *e, bool *success) {
   // TODO();
   // printf("hello\n");
   // printf("%d\n", nr_token);
+  int i;
+	for (i = 0; i < nr_token; i++){
+		if (tokens[i].type == '*' && (i == 0 || (tokens[i - 1].type != NUM && tokens[i - 1].type != HEX && tokens[i - 1].type != ')'))){
+			tokens[i].type = POINT;
+		}
+		if (tokens[i].type == '-' && (i == 0 || (tokens[i - 1].type != NUM && tokens[i - 1].type != HEX && tokens[i - 1].type != ')'))){
+			tokens[i].type = NEG;
+		}
+	}
   int result = eval(0, nr_token-1);
   printf("%d\n", result);
   return 0;
