@@ -21,7 +21,7 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, TK_EQ, NUM = 1
 
   /* TODO: Add more token types */
 
@@ -38,7 +38,16 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"\\-", '-'},         // minus
+  {"\\*", '*'},         // multiply
+  {"\\/", '/'},         // divide
+  {"\\(", '('},         //
+  {"\\)", ')'},         // 
+  
+
   {"==", TK_EQ},        // equal
+
+  {"[0-9]+", NUM},
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -94,9 +103,46 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
-        switch (rules[i].token_type) {
-          default: TODO();
-        }
+        int j;
+				for (j = 0; j < 32; j++) { //清空
+					tokens[nr_token].str[j] = '\0';
+				}
+				
+				switch(rules[i].token_type) {
+					case 256:
+						break;
+					case 1:
+						tokens[nr_token].type = 1;
+						strncpy(tokens[nr_token].str, &e[position - substr_len], substr_len);
+						nr_token++;
+						break;
+					case '+':
+						tokens[nr_token].type = '+';
+						nr_token++;
+						break;
+					case '-':
+						tokens[nr_token].type = '-';
+						nr_token++;
+						break;
+					case '*':
+						tokens[nr_token].type = '*';
+						nr_token++;
+						break;
+					case '/':
+						tokens[nr_token].type = '/';
+						nr_token++;
+						break;
+					case '(':
+						tokens[nr_token].type = '(';
+						nr_token++;
+						break;
+					case ')':
+						tokens[nr_token].type = ')';
+						nr_token++;
+						break;
+					default: 
+						assert(0);
+				}
 
         break;
       }
@@ -123,3 +169,120 @@ word_t expr(char *e, bool *success) {
 
   return 0;
 }
+
+bool check_parentheses(int p, int q){
+	int a;
+	int j = 0, k = 0;
+	if (tokens[p].type == '(' || tokens[q].type == ')'){
+		for (a = p; a <= q; a++){
+			if (tokens[a].type == '('){
+				j++;
+			}
+			if (tokens[a].type == ')'){
+				k++;
+			}
+			if (a != q && j == k){
+				return false;
+			}
+		}
+		if (j == k){
+				return true;
+			} else {
+				return false;
+			}
+	}
+	return false;
+}
+
+int dominant_operator(int p, int q){
+	int step = 0;
+	int i;
+	int op = -1;
+	int pri = 0;
+    
+	for (i = p; i <= q; i++){
+		if (tokens[i].type == '('){
+			step++;
+		}
+		if (tokens[i].type == ')'){
+			step--;
+		}
+	
+		if (step == 0) {
+      if (tokens[i].type == '+' || tokens[i].type == '-'){
+        if (pri < 48){
+          op = i;
+          pri = 48;
+        }
+      } 
+      else if (tokens[i].type == '*' || tokens[i].type == '/'){
+        if (pri < 46){
+          op = i;
+          pri = 46;
+        }
+      }
+      else if (step < 0){
+        return -2;
+      }
+	  }
+	}
+	return op;
+}
+
+word_t eval(int p, int q) {
+	int result = 0;
+	int op;
+	int val1, val2;
+
+  if (p > q) {
+    /* Bad expression */
+    assert(0);
+  }
+  else if (p == q) {
+    /* Single token.
+    * For now this token should be a number.
+    * Return the value of the number.
+    */
+    if (tokens[p].type == NUM){
+      sscanf(tokens[p].str, "%d", &result);
+      return result;
+    }
+    else {
+      assert(0);
+    }
+  }
+  else if (check_parentheses(p, q) == true) {
+    /* The expression is surrounded by a matched pair of parentheses.
+    * If that is the case, just throw away the parentheses.
+    */
+    return eval(p + 1, q - 1);
+  }
+  else {
+    /* We should do more things here. */
+    op = dominant_operator(p, q);
+	 	if (op == -2){
+			assert(0);
+		} 
+    else if (tokens[p].type == '!'){
+			sscanf(tokens[q].str, "%d", &result);
+			return !result;
+		} 
+    else {
+			assert(0);
+			return 0;
+		}
+
+    val1 = eval(p, op - 1);
+		val2 = eval(op + 1, q);
+
+		switch (tokens[op].type){
+			case '+' : return val1 + val2;	
+			case '-' : return val1 - val2;
+			case '*' : return val1 * val2;
+			case '/' : return val1 / val2;
+			default : assert(0);
+		}
+	}
+  return 0;
+}
+
