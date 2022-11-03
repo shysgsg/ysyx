@@ -1,4 +1,6 @@
 # ysyx
 一生一芯项目
 
-详情请见master分支
+这是main分支！！！
+
+详情请见master分支！！！
