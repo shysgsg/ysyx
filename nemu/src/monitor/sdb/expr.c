@@ -264,8 +264,8 @@ int dominant_operator(int p, int q){
 	return op;
 }
 
-int eval(int p, int q) {
-	int result = 0;
+word_t eval(int p, int q) {
+	word_t result = 0;
 	int op;
 	int val1, val2;
 
@@ -281,7 +281,7 @@ int eval(int p, int q) {
     */
     // printf("Single token.\n");
     if (tokens[p].type == NUM){
-      sscanf(tokens[p].str, "%d", &result);
+      sscanf(tokens[p].str, "%ld", &result);
       return result;
     }
     else {
@@ -303,12 +303,12 @@ int eval(int p, int q) {
     else if (op == -1)
     {
       if (tokens[p].type == NEG){
-        sscanf(tokens[q].str, "%d", &result);
+        sscanf(tokens[q].str, "%ld", &result);
         return -result;
       }
     }
     else if (tokens[p].type == '!'){
-				sscanf(tokens[q].str, "%d", &result);
+				sscanf(tokens[q].str, "%ld", &result);
 				return !result;
     }
   }
@@ -324,17 +324,15 @@ int eval(int p, int q) {
     case OR : return val1 || val2;
     case AND : return val1 && val2;
     case EQ : 
-          if (val1 == val2){
+      if (val1 == val2)
         return 1;
-          } else {
+      else 
         return 0;
-          }
     case NOTEQ :
-          if (val1 != val2){
+      if (val1 != val2)
         return 1;
-          } else {
+      else 
         return 0;
-          }
     default : assert(0);
   }
 	
