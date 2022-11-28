@@ -29,6 +29,7 @@ WP* new_wp();
 void free_wp(WP *wp);
 bool checkWP();
 void printf_wp();
+// void printf_pc();
 WP* delete_wp(int p, bool *key);
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
@@ -87,6 +88,10 @@ static int cmd_info(char *args) {
 		printf_wp();
 		return 0;
 	}
+  // if (strcmp(sencondWord, "pc") == 0){
+	// 	printf_pc();
+	// 	return 0;
+	// }
 	printf("Invalid input!\n");
 	return 0;
 }
