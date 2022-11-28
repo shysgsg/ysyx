@@ -284,6 +284,14 @@ word_t eval(int p, int q) {
       sscanf(tokens[p].str, "%ld", &result);
       return result;
     }
+    // else if (tokens[p].type == HEX){
+		// 	int i = 2;
+		// 	while(tokens[p].str[i] != 0){
+		// 		result *= 16;
+		// 		result += tokens[p].str[i] < 58 ? tokens[p].str[i] - '0' : tokens[p].str[i] - 'a' + 10;
+		// 		i++;
+		//   }
+		// } 
     else {
       assert(0);
     }

@@ -25,6 +25,11 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+WP* new_wp();
+void free_wp(WP *wp);
+bool checkWP();
+void printf_wp();
+WP* delete_wp(int p, bool *key);
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -78,6 +83,10 @@ static int cmd_info(char *args) {
 		isa_reg_display();
 	  return 0;
 	}
+  if (strcmp(sencondWord, "w") == 0){
+		printf_wp();
+		return 0;
+	}
 	printf("Invalid input!\n");
 	return 0;
 }
@@ -124,6 +133,36 @@ static int cmd_p(char *args) {
 	return 0;
 }
 
+static int cmd_w(char *args){
+  char *sencondWord = strtok(NULL," ");
+	if (sencondWord != NULL){
+    WP* q = new_wp();
+		q->expr = sencondWord;
+    printf("Set watchpoint %d: %s\n", q->NO, q->expr);
+		return 0;
+	} else {
+		printf("Invalid input\n");
+		return 0;
+	}
+	return 0;
+}
+
+static int cmd_d(char *args){
+	int p;
+	bool key = true;
+	sscanf(args, "%d", &p);
+	WP* q = delete_wp(p, &key);
+	if (key){
+		printf("Delete watchpoint %d: %s\n", q->NO, q->expr);
+		free_wp(q);
+		return 0;
+	} else {
+		printf("No found watchpoint %d\n", p);
+		return 0;
+	}
+	return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -137,7 +176,9 @@ static struct {
   { "si", "Step into", cmd_si },
   { "info", "Print the information of registers", cmd_info},
   { "x", "Scan memory ", cmd_x},
-  { "p", "Evaluate expression", cmd_p}
+  { "p", "Evaluate expression", cmd_p},
+  { "w", "Set the monitor point", cmd_w},
+  { "d", "Delete the monitor point", cmd_d}
 
   /* TODO: Add more commands */
 
