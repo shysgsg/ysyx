@@ -284,14 +284,14 @@ word_t eval(int p, int q) {
       sscanf(tokens[p].str, "%ld", &result);
       return result;
     }
-    // else if (tokens[p].type == HEX){
-		// 	int i = 2;
-		// 	while(tokens[p].str[i] != 0){
-		// 		result *= 16;
-		// 		result += tokens[p].str[i] < 58 ? tokens[p].str[i] - '0' : tokens[p].str[i] - 'a' + 10;
-		// 		i++;
-		//   }
-		// } 
+    else if (tokens[p].type == HEX){
+			int i = 2;
+			while(tokens[p].str[i] != 0){
+				result *= 16;
+				result += tokens[p].str[i] < 58 ? tokens[p].str[i] - '0' : tokens[p].str[i] - 'a' + 10;
+				i++;
+		  }
+		} 
     else {
       assert(0);
     }
@@ -319,29 +319,29 @@ word_t eval(int p, int q) {
 				sscanf(tokens[q].str, "%ld", &result);
 				return !result;
     }
-  }
+    
+    val1 = eval(p, op - 1);
+    val2 = eval(op + 1, q);
 
-  val1 = eval(p, op - 1);
-  val2 = eval(op + 1, q);
-
-  switch (tokens[op].type){
-    case '+' : return val1 + val2;	
-    case '-' : return val1 - val2;
-    case '*' : return val1 * val2;
-    case '/' : return val1 / val2;
-    case OR : return val1 || val2;
-    case AND : return val1 && val2;
-    case EQ : 
-      if (val1 == val2)
-        return 1;
-      else 
-        return 0;
-    case NOTEQ :
-      if (val1 != val2)
-        return 1;
-      else 
-        return 0;
-    default : assert(0);
+    switch (tokens[op].type){
+      case '+' : return val1 + val2;	
+      case '-' : return val1 - val2;
+      case '*' : return val1 * val2;
+      case '/' : return val1 / val2;
+      case OR : return val1 || val2;
+      case AND : return val1 && val2;
+      case EQ : 
+        if (val1 == val2)
+          return 1;
+        else 
+          return 0;
+      case NOTEQ :
+        if (val1 != val2)
+          return 1;
+        else 
+          return 0;
+      default : assert(0);
+    }
   }
 	
   return 0;
