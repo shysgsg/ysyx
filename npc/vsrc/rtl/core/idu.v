@@ -14,4 +14,4 @@ module ysyx_22050368_idu(
     // output [`XLEN-1:0] dec_imm,                   // 译码出的立即数
 
 
-)
+);
