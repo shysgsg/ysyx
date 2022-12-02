@@ -17,83 +17,89 @@
 // `define STALL_ID     2'd2
 // `define STALL_EX     2'd3
 
-// `define INST_NOP     32'h00000013
-// `define INST_MRET    32'h30200073
-// `define INST_ECALL   32'h00000073
-// `define INST_EBREAK  32'h00100073
+`define Hold_Flag_Bus   2:0
+`define Hold_None 3'b000
+`define Hold_Pc   3'b001
+`define Hold_If   3'b010
+`define Hold_Id   3'b011
+
+`define INST_NOP     32'h00000013
+`define INST_MRET    32'h30200073
+`define INST_ECALL   32'h00000073
+`define INST_EBREAK  32'h00100073
 
 // 指令译码信息
-// `define DECINFO_GRP_BUS           2:0
-// `define DECINFO_GRP_WIDTH         3
-// `define DECINFO_GRP_ALU           `DECINFO_GRP_WIDTH'd1
-// `define DECINFO_GRP_BJP           `DECINFO_GRP_WIDTH'd2
-// `define DECINFO_GRP_MULDIV        `DECINFO_GRP_WIDTH'd3
-// `define DECINFO_GRP_CSR           `DECINFO_GRP_WIDTH'd4
-// `define DECINFO_GRP_MEM           `DECINFO_GRP_WIDTH'd5
-// `define DECINFO_GRP_SYS           `DECINFO_GRP_WIDTH'd6
+`define DECINFO_GRP_BUS           2:0
+`define DECINFO_GRP_WIDTH         3
+`define DECINFO_GRP_ALU           `DECINFO_GRP_WIDTH'd1
+`define DECINFO_GRP_BJP           `DECINFO_GRP_WIDTH'd2
+`define DECINFO_GRP_MULDIV        `DECINFO_GRP_WIDTH'd3
+`define DECINFO_GRP_CSR           `DECINFO_GRP_WIDTH'd4
+`define DECINFO_GRP_MEM           `DECINFO_GRP_WIDTH'd5
+`define DECINFO_GRP_SYS           `DECINFO_GRP_WIDTH'd6
 
-// `define DECINFO_ALU_BUS_WIDTH     (`DECINFO_GRP_WIDTH+14)
-// `define DECINFO_ALU_LUI           (`DECINFO_GRP_WIDTH+0)
-// `define DECINFO_ALU_AUIPC         (`DECINFO_GRP_WIDTH+1)
-// `define DECINFO_ALU_ADD           (`DECINFO_GRP_WIDTH+2)
-// `define DECINFO_ALU_SUB           (`DECINFO_GRP_WIDTH+3)
-// `define DECINFO_ALU_SLL           (`DECINFO_GRP_WIDTH+4)
-// `define DECINFO_ALU_SLT           (`DECINFO_GRP_WIDTH+5)
-// `define DECINFO_ALU_SLTU          (`DECINFO_GRP_WIDTH+6)
-// `define DECINFO_ALU_XOR           (`DECINFO_GRP_WIDTH+7)
-// `define DECINFO_ALU_SRL           (`DECINFO_GRP_WIDTH+8)
-// `define DECINFO_ALU_SRA           (`DECINFO_GRP_WIDTH+9)
-// `define DECINFO_ALU_OR            (`DECINFO_GRP_WIDTH+10)
-// `define DECINFO_ALU_AND           (`DECINFO_GRP_WIDTH+11)
-// `define DECINFO_ALU_OP2IMM        (`DECINFO_GRP_WIDTH+12)
-// `define DECINFO_ALU_OP1PC         (`DECINFO_GRP_WIDTH+13)
+`define DECINFO_ALU_BUS_WIDTH     (`DECINFO_GRP_WIDTH+14)
+`define DECINFO_ALU_LUI           (`DECINFO_GRP_WIDTH+0)
+`define DECINFO_ALU_AUIPC         (`DECINFO_GRP_WIDTH+1)
+`define DECINFO_ALU_ADD           (`DECINFO_GRP_WIDTH+2)
+`define DECINFO_ALU_SUB           (`DECINFO_GRP_WIDTH+3)
+`define DECINFO_ALU_SLL           (`DECINFO_GRP_WIDTH+4)
+`define DECINFO_ALU_SLT           (`DECINFO_GRP_WIDTH+5)
+`define DECINFO_ALU_SLTU          (`DECINFO_GRP_WIDTH+6)
+`define DECINFO_ALU_XOR           (`DECINFO_GRP_WIDTH+7)
+`define DECINFO_ALU_SRL           (`DECINFO_GRP_WIDTH+8)
+`define DECINFO_ALU_SRA           (`DECINFO_GRP_WIDTH+9)
+`define DECINFO_ALU_OR            (`DECINFO_GRP_WIDTH+10)
+`define DECINFO_ALU_AND           (`DECINFO_GRP_WIDTH+11)
+`define DECINFO_ALU_OP2IMM        (`DECINFO_GRP_WIDTH+12)
+`define DECINFO_ALU_OP1PC         (`DECINFO_GRP_WIDTH+13)
 
-// `define DECINFO_BJP_BUS_WIDTH     (`DECINFO_GRP_WIDTH+8)
-// `define DECINFO_BJP_JUMP          (`DECINFO_GRP_WIDTH+0)
-// `define DECINFO_BJP_BEQ           (`DECINFO_GRP_WIDTH+1)
-// `define DECINFO_BJP_BNE           (`DECINFO_GRP_WIDTH+2)
-// `define DECINFO_BJP_BLT           (`DECINFO_GRP_WIDTH+3)
-// `define DECINFO_BJP_BGE           (`DECINFO_GRP_WIDTH+4)
-// `define DECINFO_BJP_BLTU          (`DECINFO_GRP_WIDTH+5)
-// `define DECINFO_BJP_BGEU          (`DECINFO_GRP_WIDTH+6)
-// `define DECINFO_BJP_OP1RS1        (`DECINFO_GRP_WIDTH+7)
+`define DECINFO_BJP_BUS_WIDTH     (`DECINFO_GRP_WIDTH+8)
+`define DECINFO_BJP_JUMP          (`DECINFO_GRP_WIDTH+0)
+`define DECINFO_BJP_BEQ           (`DECINFO_GRP_WIDTH+1)
+`define DECINFO_BJP_BNE           (`DECINFO_GRP_WIDTH+2)
+`define DECINFO_BJP_BLT           (`DECINFO_GRP_WIDTH+3)
+`define DECINFO_BJP_BGE           (`DECINFO_GRP_WIDTH+4)
+`define DECINFO_BJP_BLTU          (`DECINFO_GRP_WIDTH+5)
+`define DECINFO_BJP_BGEU          (`DECINFO_GRP_WIDTH+6)
+`define DECINFO_BJP_OP1RS1        (`DECINFO_GRP_WIDTH+7)
 
-// `define DECINFO_MULDIV_BUS_WIDTH  (`DECINFO_GRP_WIDTH+8)
-// `define DECINFO_MULDIV_MUL        (`DECINFO_GRP_WIDTH+0)
-// `define DECINFO_MULDIV_MULH       (`DECINFO_GRP_WIDTH+1)
-// `define DECINFO_MULDIV_MULHSU     (`DECINFO_GRP_WIDTH+2)
-// `define DECINFO_MULDIV_MULHU      (`DECINFO_GRP_WIDTH+3)
-// `define DECINFO_MULDIV_DIV        (`DECINFO_GRP_WIDTH+4)
-// `define DECINFO_MULDIV_DIVU       (`DECINFO_GRP_WIDTH+5)
-// `define DECINFO_MULDIV_REM        (`DECINFO_GRP_WIDTH+6)
-// `define DECINFO_MULDIV_REMU       (`DECINFO_GRP_WIDTH+7)
+`define DECINFO_MULDIV_BUS_WIDTH  (`DECINFO_GRP_WIDTH+8)
+`define DECINFO_MULDIV_MUL        (`DECINFO_GRP_WIDTH+0)
+`define DECINFO_MULDIV_MULH       (`DECINFO_GRP_WIDTH+1)
+`define DECINFO_MULDIV_MULHSU     (`DECINFO_GRP_WIDTH+2)
+`define DECINFO_MULDIV_MULHU      (`DECINFO_GRP_WIDTH+3)
+`define DECINFO_MULDIV_DIV        (`DECINFO_GRP_WIDTH+4)
+`define DECINFO_MULDIV_DIVU       (`DECINFO_GRP_WIDTH+5)
+`define DECINFO_MULDIV_REM        (`DECINFO_GRP_WIDTH+6)
+`define DECINFO_MULDIV_REMU       (`DECINFO_GRP_WIDTH+7)
 
-// `define DECINFO_CSR_BUS_WIDTH     (`DECINFO_GRP_WIDTH+16)
-// `define DECINFO_CSR_CSRRW         (`DECINFO_GRP_WIDTH+0)
-// `define DECINFO_CSR_CSRRS         (`DECINFO_GRP_WIDTH+1)
-// `define DECINFO_CSR_CSRRC         (`DECINFO_GRP_WIDTH+2)
-// `define DECINFO_CSR_RS1IMM        (`DECINFO_GRP_WIDTH+3)
-// `define DECINFO_CSR_CSRADDR       `DECINFO_GRP_WIDTH+4+12-1:`DECINFO_GRP_WIDTH+4
+`define DECINFO_CSR_BUS_WIDTH     (`DECINFO_GRP_WIDTH+16)
+`define DECINFO_CSR_CSRRW         (`DECINFO_GRP_WIDTH+0)
+`define DECINFO_CSR_CSRRS         (`DECINFO_GRP_WIDTH+1)
+`define DECINFO_CSR_CSRRC         (`DECINFO_GRP_WIDTH+2)
+`define DECINFO_CSR_RS1IMM        (`DECINFO_GRP_WIDTH+3)
+`define DECINFO_CSR_CSRADDR       `DECINFO_GRP_WIDTH+4+12-1:`DECINFO_GRP_WIDTH+4
 
-// `define DECINFO_MEM_BUS_WIDTH     (`DECINFO_GRP_WIDTH+8)
-// `define DECINFO_MEM_LB            (`DECINFO_GRP_WIDTH+0)
-// `define DECINFO_MEM_LH            (`DECINFO_GRP_WIDTH+1)
-// `define DECINFO_MEM_LW            (`DECINFO_GRP_WIDTH+2)
-// `define DECINFO_MEM_LBU           (`DECINFO_GRP_WIDTH+3)
-// `define DECINFO_MEM_LHU           (`DECINFO_GRP_WIDTH+4)
-// `define DECINFO_MEM_SB            (`DECINFO_GRP_WIDTH+5)
-// `define DECINFO_MEM_SH            (`DECINFO_GRP_WIDTH+6)
-// `define DECINFO_MEM_SW            (`DECINFO_GRP_WIDTH+7)
+`define DECINFO_MEM_BUS_WIDTH     (`DECINFO_GRP_WIDTH+8)
+`define DECINFO_MEM_LB            (`DECINFO_GRP_WIDTH+0)
+`define DECINFO_MEM_LH            (`DECINFO_GRP_WIDTH+1)
+`define DECINFO_MEM_LW            (`DECINFO_GRP_WIDTH+2)
+`define DECINFO_MEM_LBU           (`DECINFO_GRP_WIDTH+3)
+`define DECINFO_MEM_LHU           (`DECINFO_GRP_WIDTH+4)
+`define DECINFO_MEM_SB            (`DECINFO_GRP_WIDTH+5)
+`define DECINFO_MEM_SH            (`DECINFO_GRP_WIDTH+6)
+`define DECINFO_MEM_SW            (`DECINFO_GRP_WIDTH+7)
 
-// `define DECINFO_SYS_BUS_WIDTH     (`DECINFO_GRP_WIDTH+5)
-// `define DECINFO_SYS_ECALL         (`DECINFO_GRP_WIDTH+0)
-// `define DECINFO_SYS_EBREAK        (`DECINFO_GRP_WIDTH+1)
-// `define DECINFO_SYS_NOP           (`DECINFO_GRP_WIDTH+2)
-// `define DECINFO_SYS_MRET          (`DECINFO_GRP_WIDTH+3)
-// `define DECINFO_SYS_FENCE         (`DECINFO_GRP_WIDTH+4)
+`define DECINFO_SYS_BUS_WIDTH     (`DECINFO_GRP_WIDTH+5)
+`define DECINFO_SYS_ECALL         (`DECINFO_GRP_WIDTH+0)
+`define DECINFO_SYS_EBREAK        (`DECINFO_GRP_WIDTH+1)
+`define DECINFO_SYS_NOP           (`DECINFO_GRP_WIDTH+2)
+`define DECINFO_SYS_MRET          (`DECINFO_GRP_WIDTH+3)
+`define DECINFO_SYS_FENCE         (`DECINFO_GRP_WIDTH+4)
 
 // 最长的那组
-// `define DECINFO_WIDTH             `DECINFO_CSR_BUS_WIDTH
+`define DECINFO_WIDTH             `DECINFO_CSR_BUS_WIDTH
 
 // CSR寄存器地址
 // `define CSR_CYCLE       12'hc00
@@ -105,8 +111,8 @@
 // `define CSR_MSTATUS     12'h300
 // `define CSR_MSCRATCH    12'h340
 
-`define RstEnable 1'b0
-`define RstDisable 1'b1
+`define RstEnable 1'b1
+`define RstDisable 1'b0
 `define ZeroWord 32'h0
 `define ZeroReg 5'h0
 `define WriteEnable 1'b1
@@ -135,9 +141,10 @@
 `define INT_DEASSERT 1'b0
 `define InstAddrBus 63:0
 `define InstBus 31:0
+`define Hold_Flag_Bus 2:0
 `define RFIDX_WIDTH 5
 `define RFREG_NUM 32
-`define DECINFO_WIDTH 32
+// `define DECINFO_WIDTH 32
 `define XLEN 64
 
 

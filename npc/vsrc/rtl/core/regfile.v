@@ -13,7 +13,7 @@ module ysyx_22050368_regfile(
   output [`XLEN-1:0] x1_r,                   // x1寄存器的值（x1有特殊加速）
 
   input  clk,                                // 时钟
-  input  rst_n                               // 复位（低电平有效）
+  input  rst                                 // 复位（低电平有效）
   );
 
   wire [`XLEN-1:0] rf_r [`RFREG_NUM-1:0];    // 使用二维数组定义寄存器组

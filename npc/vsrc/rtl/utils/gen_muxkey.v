@@ -98,7 +98,7 @@ module mux81(a,s,y);
   input  [2:0] s;
   output [63:0] y;
 
-  MuxKeyWithDefault #(8, 3, 64) i0 (y, s, 1'b0, {
+  MuxKeyWithDefault #(8, 3, 64) i0 (y, s, 64'b0, {
     3'b000, a[0],
     3'b001, a[1],
     3'b010, a[2],
