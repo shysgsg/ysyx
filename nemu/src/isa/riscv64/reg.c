@@ -23,15 +23,34 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+// typedef struct _isa_gdb_regs {
+//       uint64_t gpr[32];
+//       uint64_t fpr[32];
+//       uint64_t pc;
+// } isa_gdb_regs;
+
+// isa_gdb_regs reg_value;
+word_t isa_get_regname(int index){
+  return *regs[index];
+}
+
+bool *success;
 void isa_reg_display() {
   int i = 0;
   while ( i < 32 ) {
-    printf("%s\t\t", regs[i]);
+    // printf("%s: %lx\n", regs[i], gpr(i));
+    printf("%s: %lx\n", regs[i], isa_reg_str2val(regs[i], success));
     i++;
   }
-  printf("\n");
+  // printf("\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
+  int i;
+  // *success = true;
+  for(i=0; i<32; i++)
+    if(s==regs[i])
+      return gpr(i);
+  // *success = false;
   return 0;
 }

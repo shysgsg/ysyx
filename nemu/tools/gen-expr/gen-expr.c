@@ -31,9 +31,83 @@ static char *code_format =
 "  return 0; "
 "}";
 
+int i = 1;
+
+void gen_num(){
+  srand((unsigned int)time(NULL));
+	int ret1 = rand() % 100; 
+  buf[i] = ret1;
+  i++;
+}
+
+void gen(char c){
+  buf[i] = c;
+  i++;
+}
+
+void gen_rand_op(){
+  srand((unsigned int)time(NULL));
+	int ret2 = rand() % 10; 
+  switch (ret2)
+  {
+    case 0:
+      buf[i] = '+';
+      break;
+    case 1:
+      buf[i] = '-';
+      break;
+    case 2:
+      buf[i] = '*';
+      break;
+    case 3:
+      buf[i] = '/';
+      break;
+    case 4:
+      buf[i] = '&';
+      break;
+    case 5:
+      buf[i] = '|';
+      break;
+    case 6:
+      buf[i] = '&';
+      i++;
+      buf[i] = '&';
+      break;
+    case 7:
+      buf[i] = '|';
+      i++;
+      buf[i] = '|';
+      break;
+    case 8:
+      buf[i] = '=';
+      i++;
+      buf[i] = '=';   
+      break;
+    case 9:
+      buf[i] = '!';
+      i++;
+      buf[i] = '=';   
+      break;
+    default:
+      break;
+  }
+  i++;
+}
+
+uint32_t choose(uint32_t n){
+  srand((unsigned int)time(NULL));
+	return rand() % n;
+}
+
 static void gen_rand_expr() {
   buf[0] = '\0';
+  switch (choose(3)) {
+    case 0: gen_num(); break;
+    case 1: gen('('); gen_rand_expr(); gen(')'); break;
+    default: gen_rand_expr(); gen_rand_op(); gen_rand_expr(); break;
+  } 
 }
+ 
 
 int main(int argc, char *argv[]) {
   int seed = time(0);
@@ -60,10 +134,11 @@ int main(int argc, char *argv[]) {
     assert(fp != NULL);
 
     int result;
-    fscanf(fp, "%d", &result);
+    int temp = fscanf(fp, "%d", &result);
     pclose(fp);
 
     printf("%u %s\n", result, buf);
+    if(temp == 1) ;
   }
   return 0;
 }

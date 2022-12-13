@@ -19,6 +19,9 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include "../../isa/riscv64/local-include/reg.h"
+
+word_t isa_get_regname(int index);
 
 enum {
   TK_NOTYPE = 256, 
@@ -59,8 +62,9 @@ static struct rule {
 	{"!=", NOTEQ},        // not
 
   {"[0-9]+", NUM},            // number
-  {"\\$[a-z]+", RESGISTER},   // register
+  {"\\$[a-z0-9]+", RESGISTER},   // register
 	{"0[xX][0-9a-fA-F]+", HEX}, // hex
+  
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -244,12 +248,29 @@ int dominant_operator(int p, int q){
 		}
 	
 		if (step == 0) {
-      if (tokens[i].type == '+' || tokens[i].type == '-'){
+      if (tokens[i].type == OR){
+        if (pri < 51){
+          op = i;
+          pri = 51;
+        }
+		  } else if (tokens[i].type == AND){
+        if (pri < 50){
+          op = i;
+          pri = 50;
+        }
+		  } 
+      else if (tokens[i].type == EQ || tokens[i].type == NOTEQ){
+        if (pri < 49){
+          op = i;
+          pri = 49;
+        }
+      }
+      else if (tokens[i].type == '+' || tokens[i].type == '-'){
         if (pri < 48){
           op = i;
           pri = 48;
         }
-      } 
+      }
       else if (tokens[i].type == '*' || tokens[i].type == '/'){
         if (pri < 46){
           op = i;
@@ -266,6 +287,7 @@ int dominant_operator(int p, int q){
 
 word_t eval(int p, int q) {
 	word_t result = 0;
+  int index;
 	int op;
 	int val1, val2;
 
@@ -274,6 +296,7 @@ word_t eval(int p, int q) {
     printf("Bad expression!\n");
     assert(0);
   }
+
   else if (p == q) {
     /* Single token.
     * For now this token should be a number.
@@ -284,24 +307,34 @@ word_t eval(int p, int q) {
       sscanf(tokens[p].str, "%ld", &result);
       return result;
     }
+
+    else if (tokens[p].type == RESGISTER){
+      sscanf(tokens[p].str+2, "%d", &index);
+			return isa_get_regname(index);
+      assert(0);
+    }
+
     else if (tokens[p].type == HEX){
-			int i = 2;
-			while(tokens[p].str[i] != 0){
-				result *= 16;
-				result += tokens[p].str[i] < 58 ? tokens[p].str[i] - '0' : tokens[p].str[i] - 'a' + 10;
-				i++;
-		  }
-		} 
+      int i = 2;
+      while(tokens[p].str[i] != 0){
+        result *= 16;
+        result += tokens[p].str[i] < 58 ? tokens[p].str[i] - '0' : tokens[p].str[i] - 'a' + 10;
+        i++;
+      }
+    } 
+
     else {
       assert(0);
     }
-  }
+    }
+
   else if (check_parentheses(p, q) == true) {
     /* The expression is surrounded by a matched pair of parentheses.
     * If that is the case, just throw away the parentheses.
     */
     return eval(p + 1, q - 1);
   }
+
   else {
     /* We should do more things here. */
     op = dominant_operator(p, q);
@@ -310,16 +343,21 @@ word_t eval(int p, int q) {
 		} 
     else if (op == -1)
     {
-      if (tokens[p].type == NEG){
+      if(tokens[p].type == POINT){
+        sscanf(tokens[p+1].str+2, "%d", &index);
+        return gpr(index);
+        assert(0);
+      }
+      else if (tokens[p].type == NEG){
         sscanf(tokens[q].str, "%ld", &result);
         return -result;
       }
+      else if (tokens[p].type == '!'){
+          sscanf(tokens[q].str, "%ld", &result);
+          return !result;
+      }
     }
-    else if (tokens[p].type == '!'){
-				sscanf(tokens[q].str, "%ld", &result);
-				return !result;
-    }
-
+    
     val1 = eval(p, op - 1);
     val2 = eval(op + 1, q);
 

@@ -106,19 +106,14 @@ static int cmd_x(char *args) {
 	sscanf(sencondWord, "%d", &step);
 	sscanf(thirdWord, "%x", &address);
 
-	int i, j = 0;
+	int i = 0;
 	for (i = 0; i < step; i++) {
-		if (j % 4 == 0) {
-			printf("%#x:\t", address);
-		}
+		printf("%#x:\t", address);
 		printf("%#lx\t", paddr_read(address, 4));
 		address += 4;
-		j++;
-		if (j % 4 == 0) {
-			printf("\n");
-		}
+		printf("\n");
 	}
-	printf("\n");
+
 	return 0;
 }
 
