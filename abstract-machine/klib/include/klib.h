@@ -30,6 +30,8 @@ void  *malloc    (size_t size);
 void   free      (void *ptr);
 int    abs       (int x);
 int    atoi      (const char *nptr);
+size_t strnlen(const char *s, size_t count);
+
 
 // stdio.h
 int    printf    (const char *format, ...);
