@@ -3,6 +3,7 @@
 #include <klib-macros.h>
 #include <stdarg.h>
 #include <ctype.h>
+// #include <assert.h>
 // #include <stdio.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
@@ -221,7 +222,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     //先判断是不是数字
     const char * format_begin = fmt;
     const char * format_end = fmt; 
-    while (isdigit(*fmt)) {
+    while (is_digit(*fmt)) {
       format_end ++;
       fmt ++;
     }
