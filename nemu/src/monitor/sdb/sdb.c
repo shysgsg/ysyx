@@ -20,6 +20,8 @@
 #include "sdb.h"
 #include <memory/host.h>
 #include <memory/paddr.h>
+#include "../../../include/utils.h"
+// #include "../../../include/matrix.h"
 
 static int is_batch_mode = false;
 
@@ -31,6 +33,7 @@ bool checkWP();
 void printf_wp();
 // void printf_pc();
 WP* delete_wp(int p, bool *key);
+
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -57,7 +60,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  // printf("exit successfully!\n");
+  nemu_state.state = NEMU_QUIT;
   return -1;
 }
 
@@ -67,14 +70,12 @@ static int cmd_si(char *args) {
     cpu_exec(1);
     return 0;
   }
-  int i = atoi(count) - 1;
-  if ( i < 0 ) {
+  int i = atoi(count);
+  if ( i <= 0 ) {
     printf("Invalid input!\n");
   }
-  while ( i >= 0 ) {
-    cpu_exec(1);
-    i--;  
-  }
+ else 
+    cpu_exec(i);
   return 0;
 }
 
@@ -268,4 +269,7 @@ void init_sdb() {
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();
+
+  // InitialMatrix(&iringbuf, MAX_IRINGBUF);
+
 }

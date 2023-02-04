@@ -17,6 +17,7 @@
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
+#include "../../include/matrix.h"
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -25,17 +26,27 @@
  */
 #define MAX_INST_TO_PRINT 10000
 
+Matrix iringbuf = {};
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
+void InitialMatrix(Matrix *T,int m);
+void FreeMatrix(Matrix *T);
+void SetMatrix(Matrix *T, int m, char *value);
+void PrintMatrix(Matrix *T);
 void device_update();
 
-static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
+static void trace_and_difftest(Decode *_this, Matrix *_iringbuf, vaddr_t dnpc) {
+  SetMatrix(_iringbuf, _iringbuf->ip, _this->logbuf);
+  _iringbuf->ip ++;
+  _iringbuf->ip %= MAX_IRINGBUF; 
+
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
-#endif
+#endif  
+  
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 }
@@ -70,13 +81,17 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
 static void execute(uint64_t n) {
   Decode s;
+
   for (;n > 0; n --) {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
-    trace_and_difftest(&s, cpu.pc);
+    trace_and_difftest(&s, &iringbuf, cpu.pc);
     if (nemu_state.state != NEMU_RUNNING) break;
     IFDEF(CONFIG_DEVICE, device_update());
   }
+
+  PrintMatrix(&iringbuf);
+  // FreeMatrix(&iringbuf);
 }
 
 static void statistic() {
@@ -102,6 +117,8 @@ void cpu_exec(uint64_t n) {
       return;
     default: nemu_state.state = NEMU_RUNNING;
   }
+
+  InitialMatrix(&iringbuf, MAX_IRINGBUF);
 
   uint64_t timer_start = get_time();
 
